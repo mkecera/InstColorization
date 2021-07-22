@@ -1,17 +1,5 @@
-import os
 from os.path import join
-import time
-from options.train_options import TrainOptions, TestOptions
-from models import create_model
-from util.visualizer import Visualizer
-
 import torch
-import torchvision
-import torchvision.transforms as transforms
-from tqdm import trange, tqdm
-
-from fusion_dataset import Fusion_Testing_Dataset
-from util import util
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import numpy as np
