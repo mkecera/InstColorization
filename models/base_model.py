@@ -23,10 +23,17 @@ class BaseModel():
         self.save_dir = os.path.join(opt.checkpoints_dir, opt.name)
         if opt.resize_or_crop != 'scale_width':
             torch.backends.cudnn.benchmark = True
-        self.loss_names = []
         self.model_names = []
         self.visual_names = []
         self.image_paths = []
+
+        self.loss_names = ['G', 'L1']
+        self.avg_losses = OrderedDict()
+        self.avg_loss_alpha = opt.avg_loss_alpha
+        self.error_cnt = 0
+        self.criterionL1 = networks.HuberLoss(delta=1. / opt.ab_norm)
+        for loss_name in self.loss_names:
+            self.avg_losses[loss_name] = 0
 
     def set_input(self, input):
         self.input = input
@@ -81,10 +88,14 @@ class BaseModel():
 
     # return traning losses/errors. train.py will print out these errors as debugging information
     def get_current_losses(self):
+        self.loss_L1 = torch.mean(self.criterionL1(self.fake_B_reg.type(torch.cuda.FloatTensor),
+                                                   self.full_real_B.type(torch.cuda.FloatTensor)))
+        self.loss_G = 10 * torch.mean(self.criterionL1(self.fake_B_reg.type(torch.cuda.FloatTensor),
+                                                       self.full_real_B.type(torch.cuda.FloatTensor)))
+        self.error_cnt += 1
         errors_ret = OrderedDict()
         for name in self.loss_names:
             if isinstance(name, str):
-                # float(...) works for both scalar tensor and float number
                 errors_ret[name] = float(getattr(self, 'loss_' + name))
         return errors_ret
 
