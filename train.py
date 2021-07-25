@@ -27,7 +27,6 @@ if __name__ == '__main__':
     model.setup(opt)
 
     opt.display_port = 8098
-    visualizer = Visualizer(opt)
     total_steps = 0
 
     if opt.stage == 'full' or opt.stage == 'instance':
@@ -51,18 +50,14 @@ if __name__ == '__main__':
                 input_data['hint_B'] = gt_data['hint_B']
                 input_data['mask_B'] = gt_data['mask_B']
 
-                visualizer.reset()
                 model.set_input(input_data)
                 model.optimize_parameters()
 
                 if total_steps % opt.display_freq == 0:
                     save_result = total_steps % opt.update_html_freq == 0
-                    visualizer.display_current_results(model.get_current_visuals(), epoch, save_result)
 
                 if total_steps % opt.print_freq == 0:
                     losses = model.get_current_losses()
-                    if opt.display_id > 0:
-                        visualizer.plot_current_losses(epoch, float(epoch_iter) / dataset_size, opt, losses)
 
             if epoch % opt.save_epoch_freq == 0:
                 model.save_networks('latest')
@@ -91,19 +86,16 @@ if __name__ == '__main__':
                     continue
                 cropped_input_data['B'] = cropped_gt_data['B']
                 full_input_data['B'] = full_gt_data['B']
-                visualizer.reset()
                 model.set_input(cropped_input_data)
                 model.set_fusion_input(full_input_data, [box_info, box_info_2x, box_info_4x, box_info_8x])
                 model.optimize_parameters()
 
                 if total_steps % opt.display_freq == 0:
                     save_result = total_steps % opt.update_html_freq == 0
-                    visualizer.display_current_results(model.get_current_visuals(), epoch, save_result)
 
                 if total_steps % opt.print_freq == 0:
                     losses = model.get_current_losses()
-                    if opt.display_id > 0:
-                        visualizer.plot_current_losses(epoch, float(epoch_iter) / dataset_size, opt, losses)
+
             if epoch % opt.save_epoch_freq == 0:
                 model.save_fusion_epoch(epoch)
             model.update_learning_rate()
