@@ -26,18 +26,17 @@ if __name__ == '__main__':
     dataset_size = len(dataset)
     print('#Testing images = %d' % dataset_size)
 
-    epoch_weights = glob.glob(f'checkpoints/coco_mask/[0-9]*.pth')
+    epoch_weights = glob.glob(f'checkpoints/{opt.name}/[0-9]*.pth')
     epoch_weights = [i.split('/')[-1] for i in epoch_weights]
 
     model = create_model(opt)
-    # model.setup_to_test('coco_finetuned_mask_256')
 
     g_list = []
     l1_list = []
     losses_list = []
 
     for weight_file in epoch_weights:
-        model.setup_to_test(f'coco_mask/{weight_file}')
+        model.setup_to_test(f'{opt.name}/{weight_file}')
         count_empty = 0
         for data_raw in tqdm(dataset_loader, dynamic_ncols=True):
             data_raw['full_img'][0] = data_raw['full_img'][0].cuda()
