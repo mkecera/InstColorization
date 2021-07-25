@@ -60,6 +60,6 @@ if __name__ == '__main__':
         g_list.append(losses['G'])
         l1_list.append(losses['L1'])
     df = pd.DataFrame(l1_list, columns=['L1'])
-    filename = f"./loss_results/validation_losses_lr_{str(opt.lr)}_epochs_{str(opt.niter)}.csv"
+    filename = f"./loss_results/{opt.name}_validation_losses_lr_{str(opt.lr)}_epochs_{str(opt.niter)}.csv"
     df.to_csv(filename)
     print(f"Saved csv of validation results in {filename}")
