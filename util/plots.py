@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 
-def plot_losses(train_list, validation_list, learning_rate, epochs):
+def plot_losses(train_list, validation_list, name, learning_rate, epochs):
 	epoch_range = range(1, len(train_list) + 1)
 	# plotting the line 1 points
 	plt.plot(epoch_range, train_list, label="Train")
@@ -15,7 +15,7 @@ def plot_losses(train_list, validation_list, learning_rate, epochs):
 	# show a legend on the plot
 	plt.legend()
 	# Display a figure.
-	plot_file = f"./plot_results/losses_lr_{str(learning_rate)}_epochs_{str(epochs)}.png"
+	plot_file = f"./plot_results/{name}_losses_lr_{str(learning_rate)}_epochs_{str(epochs)}.png"
 	plt.savefig(plot_file)
 	print(f"Saved plot in {plot_file}")
 	plt.close()
