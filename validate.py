@@ -28,6 +28,7 @@ if __name__ == '__main__':
 
     epoch_weights = glob.glob(f'checkpoints/{opt.name}/[0-9]*.pth')
     epoch_weights = [i.split('/')[-1] for i in epoch_weights]
+    epoch_weights.sort(key=lambda x: int(x.split('_')[0]))
 
     model = create_model(opt)
 
