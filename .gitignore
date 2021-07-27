@@ -1,3 +1,7 @@
 train_data/*
 .idea/*
 venv/*
+train*/
+test*/
+val*/
+result*/

@@ -2,6 +2,10 @@ import os
 import torch
 from collections import OrderedDict
 from . import networks
+import skimage
+from util import util
+from skimage import io, img_as_ubyte
+import numpy as np
 
 
 class BaseModel():
@@ -23,6 +27,7 @@ class BaseModel():
         self.save_dir = os.path.join(opt.checkpoints_dir, opt.name)
         if opt.resize_or_crop != 'scale_width':
             torch.backends.cudnn.benchmark = True
+        # self.loss_names = []
         self.model_names = []
         self.visual_names = []
         self.image_paths = []
@@ -96,8 +101,25 @@ class BaseModel():
         errors_ret = OrderedDict()
         for name in self.loss_names:
             if isinstance(name, str):
+                # float(...) works for both scalar tensor and float number
                 errors_ret[name] = float(getattr(self, 'loss_' + name))
         return errors_ret
+
+    def get_current_metric(self):
+        self.out_img = torch.clamp(util.lab2rgb(
+            torch.cat((self.full_real_A.type(torch.cuda.FloatTensor), self.fake_B_reg.type(torch.cuda.FloatTensor)),
+                      dim=1), self.opt), 0.0, 1.0)
+        self.out_img = np.transpose(self.out_img.cpu().data.numpy()[0], (1, 2, 0))
+        # self.out_img = img_as_ubyte(self.out_img)
+
+        self.true_img = torch.clamp(util.lab2rgb(
+            torch.cat((self.full_real_A.type(torch.cuda.FloatTensor), self.full_real_B.type(torch.cuda.FloatTensor)),
+                      dim=1), self.opt), 0.0, 1.0)
+        self.true_img = np.transpose(self.true_img.cpu().data.numpy()[0], (1, 2, 0))
+        # self.true_img = img_as_ubyte(self.true_img)
+        self.psnr = skimage.metrics.peak_signal_noise_ratio(self.true_img, self.out_img)
+        self.ssim = skimage.metrics.structural_similarity(self.true_img, self.out_img, multichannel=True)
+        return (self.psnr, self.ssim)
 
     # save models to the disk
     def save_networks(self, which_epoch):
