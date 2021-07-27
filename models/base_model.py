@@ -2,6 +2,10 @@ import os
 import torch
 from collections import OrderedDict
 from . import networks
+import skimage
+from util import util
+from skimage import io, img_as_ubyte
+import numpy as np
 
 
 class BaseModel():
@@ -104,6 +108,22 @@ class BaseModel():
                 # errors_ret[name] = (1 - self.avg_loss_alpha) / (1 - self.avg_loss_alpha ** self.error_cnt) * \
                 #                    self.avg_losses[name]
         return errors_ret
+
+    def get_current_metric(self):
+        self.out_img = torch.clamp(util.lab2rgb(
+            torch.cat((self.full_real_A.type(torch.cuda.FloatTensor), self.fake_B_reg.type(torch.cuda.FloatTensor)),
+                      dim=1), self.opt), 0.0, 1.0)
+        self.out_img = np.transpose(self.out_img.cpu().data.numpy()[0], (1, 2, 0))
+        # self.out_img = img_as_ubyte(self.out_img)
+
+        self.true_img = torch.clamp(util.lab2rgb(
+            torch.cat((self.full_real_A.type(torch.cuda.FloatTensor), self.full_real_B.type(torch.cuda.FloatTensor)),
+                      dim=1), self.opt), 0.0, 1.0)
+        self.true_img = np.transpose(self.true_img.cpu().data.numpy()[0], (1, 2, 0))
+        # self.true_img = img_as_ubyte(self.true_img)
+        self.psnr = skimage.metrics.peak_signal_noise_ratio(self.true_img, self.out_img)
+        self.ssim = skimage.metrics.structural_similarity(self.true_img, self.out_img, multichannel=True)
+        return (self.psnr, self.ssim)
 
     # save models to the disk
     def save_networks(self, which_epoch):

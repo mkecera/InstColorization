@@ -5,3 +5,10 @@ INFO:tornado.access:200 POST /env/main (127.0.0.1) 0.61ms
 INFO:tornado.access:101 GET /vis_socket (127.0.0.1) 0.59ms
 INFO:root:Opened visdom socket from ip: 127.0.0.1
 INFO:tornado.access:200 POST /events (127.0.0.1) 0.69ms
+/usr/local/lib/python3.7/dist-packages/visdom/server.py:39: DeprecationWarning: zmq.eventloop.ioloop is deprecated in pyzmq 17. pyzmq now works with default tornado and asyncio eventloops.
+  ioloop.install()  # Needs to happen before any tornado imports!
+INFO:root:Application Started
+INFO:tornado.access:200 POST /env/main (127.0.0.1) 0.69ms
+INFO:tornado.access:101 GET /vis_socket (127.0.0.1) 0.43ms
+INFO:root:Opened visdom socket from ip: 127.0.0.1
+INFO:tornado.access:200 POST /events (127.0.0.1) 0.70ms

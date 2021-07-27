@@ -1,4 +1,5 @@
 import time
+import datetime
 from options.train_options import TrainOptions
 from models import create_model
 from util.visualizer import Visualizer
@@ -11,6 +12,7 @@ from tqdm import trange, tqdm
 from fusion_dataset import *
 from util import util
 import os
+import pandas as pd
 
 if __name__ == '__main__':
     opt = TrainOptions().parse()
@@ -25,15 +27,14 @@ if __name__ == '__main__':
         exit()
     dataset_loader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=8)
 
-    validation_dataset = Fusion_Testing_Dataset(opt)
-    val_dataset_loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1, num_workers=2)
+    val_dataset = Fusion_Testing_Dataset(opt)
+    val_dataset_loader = torch.utils.data.DataLoader(val_dataset, batch_size=1, num_workers=2)
 
     dataset_size = len(dataset)
     print('#training images = %d' % dataset_size)
-    print('#test images = %d' % len(validation_dataset))
+    print('#validation images = %d' % len(val_dataset))
 
     model = create_model(opt)
-    val_model = create_model(opt)
     model.setup(opt)
 
     opt.display_port = 8098
@@ -80,9 +81,17 @@ if __name__ == '__main__':
                 model.save_networks(epoch)
             model.update_learning_rate()
     elif opt.stage == 'fusion':
+        loss_metric = {'train_L1_loss': [],
+                       'train_psnr': [],
+                       'train_ssim': [],
+                       'val_L1_loss': [],
+                       'val_psnr': [],
+                       'val_ssim': [],
+                       }
         for epoch in trange(opt.epoch_count, opt.niter + opt.niter_decay, desc='epoch', dynamic_ncols=True):
             epoch_iter = 0
-
+            train_psnr = []
+            train_ssim = []
             for data_raw in tqdm(dataset_loader, desc='batch', dynamic_ncols=True, leave=False):
                 # print(data_raw)
                 total_steps += opt.batch_size
@@ -110,15 +119,23 @@ if __name__ == '__main__':
 
                 if total_steps % opt.print_freq == 0:
                     losses = model.get_current_losses()
-                    # print(losses)
                     if opt.display_id > 0:
                         visualizer.plot_current_losses(epoch, float(epoch_iter) / dataset_size, opt, losses)
+
+                train_psnr.append(model.get_current_metric()[0])
+                train_ssim.append(model.get_current_metric()[1])
+
+            loss_metric['train_L1_loss'].append(model.get_current_losses()['L1'])
+            loss_metric['train_psnr'].append(np.mean(train_psnr))
+            loss_metric['train_ssim'].append(np.mean(train_ssim))
+
             if epoch % opt.save_epoch_freq == 0:
                 model.save_fusion_epoch(epoch)
             model.update_learning_rate()
 
-            val_model = model.copy()
             count_empty = 0
+            val_psnr = []
+            val_ssim = []
             for data_raw in tqdm(val_dataset_loader, dynamic_ncols=True):
                 # if os.path.isfile(join(save_img_path, data_raw['file_id'][0] + '.png')) is True:
                 #     continue
@@ -131,17 +148,26 @@ if __name__ == '__main__':
                     box_info_8x = data_raw['box_info_8x'][0]
                     cropped_data = util.get_colorization_data(data_raw['cropped_img'], opt, ab_thresh=0, p=opt.sample_p)
                     full_img_data = util.get_colorization_data(data_raw['full_img'], opt, ab_thresh=0, p=opt.sample_p)
-                    val_model.set_input(cropped_data)
-                    val_model.set_fusion_input(full_img_data, [box_info, box_info_2x, box_info_4x, box_info_8x])
-                    val_model.forward()
+                    with torch.no_grad():
+                        model.set_input(cropped_data)
+                        model.set_fusion_input(full_img_data, [box_info, box_info_2x, box_info_4x, box_info_8x])
+                        model.forward()
                 else:
                     count_empty += 1
                     full_img_data = util.get_colorization_data(data_raw['full_img'], opt, ab_thresh=0, p=opt.sample_p)
-                    val_model.set_forward_without_box(full_img_data)
-                # model.save_current_imgs(join(save_img_path, data_raw['file_id'][0] + '.png'))
-            print('{0} images without bounding boxes'.format(count_empty))
-            print(f'Validation Loss: {val_model.get_current_losses()}')
-            # print(json.dumps(data, indent=4))
+                    with torch.no_grad():
+                        model.set_forward_without_box(full_img_data)
+
+                val_psnr.append(model.get_current_metric()[0])
+                val_ssim.append(model.get_current_metric()[1])
+
+            loss_metric['val_L1_loss'].append(model.get_current_losses()['L1'])
+            loss_metric['val_psnr'].append(np.mean(val_psnr))
+            loss_metric['val_ssim'].append(np.mean(val_ssim))
+
+        loss_metric_df = pd.DataFrame(loss_metric)
+        now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        loss_metric_df.to_csv(f'loss_log/{now}_loss.txt')
 
     else:
         print('Error! Wrong stage selection!')
