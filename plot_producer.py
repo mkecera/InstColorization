@@ -1,7 +1,7 @@
 import sys
 
 from options.train_options import TestOptions
-from util.plots import plot_losses
+from util.plots import produce_plot
 import pandas as pd
 
 if __name__ == '__main__':
@@ -13,4 +13,4 @@ if __name__ == '__main__':
 	validation_file = f"./loss_results/{name}_validation_losses_lr_{lr}_epochs_{epochs}.csv"
 	train_data = pd.read_csv(train_file)['L1'].tolist()
 	val_data = pd.read_csv(validation_file)['L1'].tolist()
-	plot_losses(train_data, val_data,name, lr, epochs)
+	produce_plot(train_data, val_data, name, lr, epochs)

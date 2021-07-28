@@ -1,17 +1,10 @@
-import time
-import datetime
 from options.train_options import TrainOptions
 from models import create_model
+from util.plots import produce_plot
 from util.visualizer import Visualizer
-
-import torch
-import torchvision
-import torchvision.transforms as transforms
 from tqdm import trange, tqdm
-
 from fusion_dataset import *
 from util import util
-import os
 import pandas as pd
 
 if __name__ == '__main__':
@@ -168,7 +161,9 @@ if __name__ == '__main__':
         loss_metric_df = pd.DataFrame(loss_metric)
         filename = f"./loss_results/{opt.name}_training_losses_lr_{str(opt.lr)}_epochs_{str(opt.niter)}.csv"
         loss_metric_df.to_csv(filename)
-
+        produce_plot(loss_metric['train_L1_loss'], loss_metric['val_L1_loss'], "L1 Loss", opt.name, opt.lr, opt.niter)
+        produce_plot(loss_metric['train_psnr'], loss_metric['val_psnr'], "PSNR", opt.name, opt.lr, opt.niter)
+        produce_plot(loss_metric['train_ssim'], loss_metric['val_ssim'], "SSIM", opt.name, opt.lr, opt.niter)
     else:
         print('Error! Wrong stage selection!')
         exit()
