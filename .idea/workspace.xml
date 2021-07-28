@@ -4,12 +4,10 @@
     <list default="true" id="b5c21aef-692c-4565-bc74-fcd14db3dc55" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Untitled1.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Untitled1.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/base_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/base_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/fusion_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/fusion_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/networks.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/networks.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/options/train_options.py" beforeDir="false" afterPath="$PROJECT_DIR$/options/train_options.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_val.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_with_validation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/url.txt" beforeDir="false" afterPath="$PROJECT_DIR$/url.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/visdomlog.txt" beforeDir="false" afterPath="$PROJECT_DIR$/visdomlog.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_fusion.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_fusion.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

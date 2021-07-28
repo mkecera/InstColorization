@@ -66,5 +66,7 @@ class TestOptions(BaseOptions):
         parser.add_argument('--lr_policy', type=str, default='lambda', help='learning rate policy: lambda|step|plateau')
         parser.add_argument('--lr_decay_iters', type=int, default=50, help='multiply by a gamma every lr_decay_iters iterations')
         parser.add_argument('--avg_loss_alpha', type=float, default=.986, help='exponential averaging weight for displaying loss')
+        parser.add_argument('--model_dir', type=str, default='coco_finetuned_mask_256',
+                            help='directory to store model weights')
         self.isTrain = False
         return parser
