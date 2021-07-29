@@ -5,3 +5,6 @@ train*/
 test*/
 val*/
 result*/
+.vscode
+*.pyc
+*.zip
