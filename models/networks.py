@@ -590,6 +590,10 @@ class FusionGeneratorLarger(nn.Module):
         model3 += [nn.ReLU(True), ]
         model3 += [nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model3 += [nn.ReLU(True), ]
+        model3 += [nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
+        model3 += [nn.ReLU(True), ]
+        model3 += [nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
+        model3 += [nn.ReLU(True), ]
         model3 += [norm_layer(256), ]
         # add a subsampling layer operation
 
@@ -597,6 +601,10 @@ class FusionGeneratorLarger(nn.Module):
 
         # Conv4
         model4 = [nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
+        model4 += [nn.ReLU(True), ]
+        model4 += [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
+        model4 += [nn.ReLU(True), ]
+        model4 += [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model4 += [nn.ReLU(True), ]
         model4 += [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model4 += [nn.ReLU(True), ]
@@ -613,6 +621,10 @@ class FusionGeneratorLarger(nn.Module):
         model5 += [nn.ReLU(True), ]
         model5 += [nn.Conv2d(512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=use_bias), ]
         model5 += [nn.ReLU(True), ]
+        model5 += [nn.Conv2d(512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=use_bias), ]
+        model5 += [nn.ReLU(True), ]
+        model5 += [nn.Conv2d(512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=use_bias), ]
+        model5 += [nn.ReLU(True), ]
         model5 += [norm_layer(512), ]
 
         self.weight_layer5 = WeightGeneratorSetting(512)
@@ -624,12 +636,20 @@ class FusionGeneratorLarger(nn.Module):
         model6 += [nn.ReLU(True), ]
         model6 += [nn.Conv2d(512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=use_bias), ]
         model6 += [nn.ReLU(True), ]
+        model6 += [nn.Conv2d(512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=use_bias), ]
+        model6 += [nn.ReLU(True), ]
+        model6 += [nn.Conv2d(512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=use_bias), ]
+        model6 += [nn.ReLU(True), ]
         model6 += [norm_layer(512), ]
 
         self.weight_layer6 = WeightGeneratorSetting(512)
 
         # Conv7
         model7 = [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
+        model7 += [nn.ReLU(True), ]
+        model7 += [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
+        model7 += [nn.ReLU(True), ]
+        model7 += [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model7 += [nn.ReLU(True), ]
         model7 += [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model7 += [nn.ReLU(True), ]
