@@ -66,7 +66,7 @@ def init_net(net, init_type='xavier', gpu_ids=[]):
     return net
 
 
-def define_G(input_nc, output_nc, ngf, which_model_netG, norm='batch', use_dropout=False, init_type='xavier', gpu_ids=[], use_tanh=True, classification=True, weight=None):
+def define_G(input_nc, output_nc, ngf, which_model_netG, norm='batch', use_dropout=False, init_type='xavier', gpu_ids=[], use_tanh=True, classification=True, weight=None, fusion_type=None):
     netG = None
     norm_layer = get_norm_layer(norm_type=norm)
 
@@ -74,8 +74,10 @@ def define_G(input_nc, output_nc, ngf, which_model_netG, norm='batch', use_dropo
         netG = SIGGRAPHGenerator(input_nc, output_nc, norm_layer=norm_layer, use_tanh=use_tanh, classification=classification)
     elif which_model_netG =='instance':
         netG = InstanceGenerator(input_nc, output_nc, norm_layer=norm_layer, use_tanh=use_tanh, classification=classification)
-    elif which_model_netG == 'fusion':
+    elif which_model_netG == 'fusion' and fusion_type == None:
         netG = FusionGenerator(input_nc, output_nc, norm_layer=norm_layer, use_tanh=use_tanh, classification=classification, weight=weight)
+    elif which_model_netG == 'fusion' and fusion_type == "larger":
+        netG = FusionGeneratorLarger(input_nc, output_nc, norm_layer=norm_layer, use_tanh=use_tanh, classification=classification, weight=weight)
     else:
         raise NotImplementedError('Generator model name [%s] is not recognized' % which_model_netG)
     return init_net(netG, init_type, gpu_ids)
