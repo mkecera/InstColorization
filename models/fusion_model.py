@@ -32,7 +32,7 @@ class FusionModel(BaseModel):
         
         self.netG = networks.define_G(num_in, opt.output_nc, opt.ngf,
                                       'instance', opt.norm, not opt.no_dropout, opt.init_type, self.gpu_ids,
-                                      use_tanh=True, classification=False)
+                                      use_tanh=True, classification=False, weight = opt.weight)
         self.netG.eval()
         
         self.netGF = networks.define_G(num_in, opt.output_nc, opt.ngf,

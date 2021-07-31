@@ -66,7 +66,7 @@ def init_net(net, init_type='xavier', gpu_ids=[]):
     return net
 
 
-def define_G(input_nc, output_nc, ngf, which_model_netG, norm='batch', use_dropout=False, init_type='xavier', gpu_ids=[], use_tanh=True, classification=True):
+def define_G(input_nc, output_nc, ngf, which_model_netG, norm='batch', use_dropout=False, init_type='xavier', gpu_ids=[], use_tanh=True, classification=True, weight=None):
     netG = None
     norm_layer = get_norm_layer(norm_type=norm)
 
@@ -75,7 +75,7 @@ def define_G(input_nc, output_nc, ngf, which_model_netG, norm='batch', use_dropo
     elif which_model_netG =='instance':
         netG = InstanceGenerator(input_nc, output_nc, norm_layer=norm_layer, use_tanh=use_tanh, classification=classification)
     elif which_model_netG == 'fusion':
-        netG = FusionGenerator(input_nc, output_nc, norm_layer=norm_layer, use_tanh=use_tanh, classification=classification)
+        netG = FusionGenerator(input_nc, output_nc, norm_layer=norm_layer, use_tanh=use_tanh, classification=classification, weight=weight)
     else:
         raise NotImplementedError('Generator model name [%s] is not recognized' % which_model_netG)
     return init_net(netG, init_type, gpu_ids)
@@ -131,7 +131,7 @@ class GANLoss(nn.Module):
     def __call__(self, input, target_is_real):
         target_tensor = self.get_target_tensor(input, target_is_real)
         return self.loss(input, target_tensor)
-
+        
 
 class SIGGRAPHGenerator(nn.Module):
     def __init__(self, input_nc, output_nc, norm_layer=nn.BatchNorm2d, use_tanh=True, classification=True):
@@ -340,12 +340,17 @@ class SIGGRAPHGenerator(nn.Module):
 
 
 class FusionGenerator(nn.Module):
-    def __init__(self, input_nc, output_nc, norm_layer=nn.BatchNorm2d, use_tanh=True, classification=True):
+    def __init__(self, input_nc, output_nc, norm_layer=nn.BatchNorm2d, use_tanh=True, classification=True, weight=None):
         super(FusionGenerator, self).__init__()
         self.input_nc = input_nc
         self.output_nc = output_nc
         self.classification = classification
         use_bias = True
+
+        if weight == 'more':
+            WeightGeneratorSetting = WeightGenerator2
+        else:
+            WeightGeneratorSetting = WeightGenerator
 
         # Conv1
         # model1=[nn.ReflectionPad2d(1),]
@@ -358,7 +363,7 @@ class FusionGenerator(nn.Module):
         model1+=[norm_layer(64),]
         # add a subsampling operation
 
-        self.weight_layer = WeightGenerator(64)
+        self.weight_layer = WeightGeneratorSetting(64)
         
         # Conv2
         # model2=[nn.ReflectionPad2d(1),]
@@ -371,7 +376,7 @@ class FusionGenerator(nn.Module):
         model2+=[norm_layer(128),]
         # add a subsampling layer operation
 
-        self.weight_layer2 = WeightGenerator(128)
+        self.weight_layer2 = WeightGeneratorSetting(128)
 
         # Conv3
         # model3=[nn.ReflectionPad2d(1),]
@@ -388,7 +393,7 @@ class FusionGenerator(nn.Module):
         model3+=[norm_layer(256),]
         # add a subsampling layer operation
 
-        self.weight_layer3 = WeightGenerator(256)
+        self.weight_layer3 = WeightGeneratorSetting(256)
 
         # Conv4
         # model47=[nn.ReflectionPad2d(1),]
@@ -404,7 +409,7 @@ class FusionGenerator(nn.Module):
         model4+=[nn.ReLU(True),]
         model4+=[norm_layer(512),]
 
-        self.weight_layer4 = WeightGenerator(512)
+        self.weight_layer4 = WeightGeneratorSetting(512)
 
         # Conv5
         # model47+=[nn.ReflectionPad2d(2),]
@@ -420,7 +425,7 @@ class FusionGenerator(nn.Module):
         model5+=[nn.ReLU(True),]
         model5+=[norm_layer(512),]
 
-        self.weight_layer5 = WeightGenerator(512)
+        self.weight_layer5 = WeightGeneratorSetting(512)
 
         # Conv6
         # model6+=[nn.ReflectionPad2d(2),]
@@ -436,7 +441,7 @@ class FusionGenerator(nn.Module):
         model6+=[nn.ReLU(True),]
         model6+=[norm_layer(512),]
 
-        self.weight_layer6 = WeightGenerator(512)
+        self.weight_layer6 = WeightGeneratorSetting(512)
 
         # Conv7
         # model47+=[nn.ReflectionPad2d(1),]
@@ -452,7 +457,7 @@ class FusionGenerator(nn.Module):
         model7+=[nn.ReLU(True),]
         model7+=[norm_layer(512),]
 
-        self.weight_layer7 = WeightGenerator(512)
+        self.weight_layer7 = WeightGeneratorSetting(512)
 
         # Conv7
         model8up=[nn.ConvTranspose2d(512, 256, kernel_size=4, stride=2, padding=1, bias=use_bias)]
@@ -460,7 +465,7 @@ class FusionGenerator(nn.Module):
         # model3short8=[nn.ReflectionPad2d(1),]
         model3short8=[nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=use_bias),]
 
-        self.weight_layer8_1 = WeightGenerator(256)
+        self.weight_layer8_1 = WeightGeneratorSetting(256)
 
         # model47+=[norm_layer(256),]
         model8=[nn.ReLU(True),]
@@ -473,7 +478,7 @@ class FusionGenerator(nn.Module):
         model8+=[nn.ReLU(True),]
         model8+=[norm_layer(256),]
 
-        self.weight_layer8_2 = WeightGenerator(256)
+        self.weight_layer8_2 = WeightGeneratorSetting(256)
 
         # Conv9
         model9up=[nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1, bias=use_bias),]
@@ -482,7 +487,7 @@ class FusionGenerator(nn.Module):
         model2short9=[nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1, bias=use_bias),]
         # add the two feature maps above        
 
-        self.weight_layer9_1 = WeightGenerator(128)
+        self.weight_layer9_1 = WeightGeneratorSetting(128)
 
         # model9=[norm_layer(128),]
         model9=[nn.ReLU(True),]
@@ -491,7 +496,7 @@ class FusionGenerator(nn.Module):
         model9+=[nn.ReLU(True),]
         model9+=[norm_layer(128),]
 
-        self.weight_layer9_2 = WeightGenerator(128)
+        self.weight_layer9_2 = WeightGeneratorSetting(128)
 
         # Conv10
         model10up=[nn.ConvTranspose2d(128, 128, kernel_size=4, stride=2, padding=1, bias=use_bias),]
@@ -500,7 +505,7 @@ class FusionGenerator(nn.Module):
         model1short10=[nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=use_bias),]
         # add the two feature maps above
 
-        self.weight_layer10_1 = WeightGenerator(128)
+        self.weight_layer10_1 = WeightGeneratorSetting(128)
 
         # model10=[norm_layer(128),]
         model10=[nn.ReLU(True),]
@@ -508,7 +513,7 @@ class FusionGenerator(nn.Module):
         model10+=[nn.Conv2d(128, 128, kernel_size=3, dilation=1, stride=1, padding=1, bias=use_bias),]
         model10+=[nn.LeakyReLU(negative_slope=.2),]
 
-        self.weight_layer10_2 = WeightGenerator(128)
+        self.weight_layer10_2 = WeightGeneratorSetting(128)
 
         # classification output
         model_class=[nn.Conv2d(256, 529, kernel_size=1, padding=0, dilation=1, stride=1, bias=use_bias),]
@@ -518,7 +523,7 @@ class FusionGenerator(nn.Module):
         if(use_tanh):
             model_out+=[nn.Tanh()]
 
-        self.weight_layerout = WeightGenerator(2)
+        self.weight_layerout = WeightGeneratorSetting(2)
 
         self.model1 = nn.Sequential(*model1)
         self.model2 = nn.Sequential(*model2)
@@ -601,6 +606,83 @@ class WeightGenerator(nn.Module):
 
         self.simple_bg_conv = nn.Sequential(
             nn.Conv2d(input_ch, inner_ch, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(inner_ch, inner_ch, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(inner_ch, 1, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(True),
+        )
+
+        self.normalize = nn.Softmax(1)
+    
+    def resize_and_pad(self, feauture_maps, info_array):
+        feauture_maps = torch.nn.functional.interpolate(feauture_maps, size=(info_array[5], info_array[4]), mode='bilinear')
+        feauture_maps = torch.nn.functional.pad(feauture_maps, (info_array[0], info_array[1], info_array[2], info_array[3]), "constant", 0)
+        return feauture_maps
+    
+    def forward(self, instance_feature, bg_feature, box_info):
+        mask_list = []
+        featur_map_list = []
+        mask_sum_for_pred = torch.zeros_like(bg_feature)[:1, :1]
+        for i in range(instance_feature.shape[0]):
+            tmp_crop = torch.unsqueeze(instance_feature[i], 0)
+            conv_tmp_crop = self.simple_instance_conv(tmp_crop)
+            pred_mask = self.resize_and_pad(conv_tmp_crop, box_info[i])
+            
+            tmp_crop = self.resize_and_pad(tmp_crop, box_info[i])
+
+            mask = torch.zeros_like(bg_feature)[:1, :1]
+            mask[0, 0, box_info[i][2]:box_info[i][2] + box_info[i][5], box_info[i][0]:box_info[i][0] + box_info[i][4]] = 1.0
+            device = mask.device
+            mask = mask.type(torch.FloatTensor).to(device)
+
+            mask_sum_for_pred = torch.clamp(mask_sum_for_pred + mask, 0.0, 1.0)
+
+            mask_list.append(pred_mask)
+            featur_map_list.append(tmp_crop)
+
+        pred_bg_mask = self.simple_bg_conv(bg_feature)
+        mask_list.append(pred_bg_mask + (1 - mask_sum_for_pred) * 100000.0)
+        mask_list = self.normalize(torch.cat(mask_list, 1))
+
+        mask_list_maskout = mask_list.clone()
+        
+        instance_mask = torch.clamp(torch.sum(mask_list_maskout[:, :instance_feature.shape[0]], 1, keepdim=True), 0.0, 1.0)
+
+        featur_map_list.append(bg_feature)
+        featur_map_list = torch.cat(featur_map_list, 0)
+        mask_list_maskout = mask_list_maskout.permute(1, 0, 2, 3).contiguous()
+        out = featur_map_list * mask_list_maskout
+        out = torch.sum(out, 0, keepdim=True)
+        return out # , instance_mask, torch.clamp(mask_list, 0.0, 1.0)
+
+
+class WeightGenerator2(nn.Module):
+    def __init__(self, input_ch, inner_ch=16):
+        super(WeightGenerator2, self).__init__()
+        self.simple_instance_conv = nn.Sequential(
+            nn.Conv2d(input_ch, inner_ch, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(inner_ch, inner_ch, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(inner_ch, inner_ch, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(inner_ch, inner_ch, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(inner_ch, inner_ch, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(inner_ch, 1, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(True),
+        )
+
+        self.simple_bg_conv = nn.Sequential(
+            nn.Conv2d(input_ch, inner_ch, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(inner_ch, inner_ch, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(inner_ch, inner_ch, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(inner_ch, inner_ch, kernel_size=3, stride=1, padding=1),
             nn.ReLU(True),
             nn.Conv2d(inner_ch, inner_ch, kernel_size=3, stride=1, padding=1),
             nn.ReLU(True),
