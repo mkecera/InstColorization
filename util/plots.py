@@ -20,7 +20,7 @@ def produce_plot(train_list, validation_list, plot_name, experiment_name, learni
 	plt.plot(epoch_range, validation_list, label="Validation")
 	plt.xlabel('Epochs')
 	# Set the y axis label of the current axis.
-	plt.ylabel('Losses')
+	plt.ylabel('Value')
 	# Set a title of the current axes.
 	plt.title(f'{plot_name} per epoch [LR={str(learning_rate)}]')
 	# show a legend on the plot
