@@ -591,8 +591,6 @@ class FusionGeneratorSmaller(nn.Module):
         model3 += [nn.ReLU(True), ]
         model3 += [nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model3 += [nn.ReLU(True), ]
-        model3 += [nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
-        model3 += [nn.ReLU(True), ]
         model3 += [norm_layer(256), ]
         # add a subsampling layer operation
 
@@ -603,44 +601,9 @@ class FusionGeneratorSmaller(nn.Module):
         model4 += [nn.ReLU(True), ]
         model4 += [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model4 += [nn.ReLU(True), ]
-        model4 += [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
-        model4 += [nn.ReLU(True), ]
         model4 += [norm_layer(512), ]
 
         self.weight_layer4 = WeightGeneratorSetting(512)
-
-        # Conv5
-        model5 = [nn.Conv2d(512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=use_bias), ]
-        model5 += [nn.ReLU(True), ]
-        model5 += [nn.Conv2d(512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=use_bias), ]
-        model5 += [nn.ReLU(True), ]
-        model5 += [nn.Conv2d(512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=use_bias), ]
-        model5 += [nn.ReLU(True), ]
-        model5 += [norm_layer(512), ]
-
-        self.weight_layer5 = WeightGeneratorSetting(512)
-
-        # Conv6
-        model6 = [nn.Conv2d(512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=use_bias), ]
-        model6 += [nn.ReLU(True), ]
-        model6 += [nn.Conv2d(512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=use_bias), ]
-        model6 += [nn.ReLU(True), ]
-        model6 += [nn.Conv2d(512, 512, kernel_size=3, dilation=2, stride=1, padding=2, bias=use_bias), ]
-        model6 += [nn.ReLU(True), ]
-        model6 += [norm_layer(512), ]
-
-        self.weight_layer6 = WeightGeneratorSetting(512)
-
-        # Conv7
-        model7 = [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
-        model7 += [nn.ReLU(True), ]
-        model7 += [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
-        model7 += [nn.ReLU(True), ]
-        model7 += [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
-        model7 += [nn.ReLU(True), ]
-        model7 += [norm_layer(512), ]
-
-        self.weight_layer7 = WeightGeneratorSetting(512)
 
         # Conv8
         model8up = [nn.ConvTranspose2d(512, 256, kernel_size=4, stride=2, padding=1, bias=use_bias)]
@@ -650,8 +613,6 @@ class FusionGeneratorSmaller(nn.Module):
         self.weight_layer8_1 = WeightGeneratorSetting(256)
 
         model8 = [nn.ReLU(True), ]
-        model8 += [nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
-        model8 += [nn.ReLU(True), ]
         model8 += [nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model8 += [nn.ReLU(True), ]
         model8 += [norm_layer(256), ]
@@ -699,9 +660,6 @@ class FusionGeneratorSmaller(nn.Module):
         self.model2 = nn.Sequential(*model2)
         self.model3 = nn.Sequential(*model3)
         self.model4 = nn.Sequential(*model4)
-        self.model5 = nn.Sequential(*model5)
-        self.model6 = nn.Sequential(*model6)
-        self.model7 = nn.Sequential(*model7)
         self.model8up = nn.Sequential(*model8up)
         self.model8 = nn.Sequential(*model8)
         self.model9up = nn.Sequential(*model9up)
@@ -731,16 +689,7 @@ class FusionGeneratorSmaller(nn.Module):
         conv4_3 = self.model4(conv3_3[:, :, ::2, ::2])
         conv4_3 = self.weight_layer4(instance_feature['conv4_3'], conv4_3, box_info_list[3])
 
-        conv5_3 = self.model5(conv4_3)
-        conv5_3 = self.weight_layer5(instance_feature['conv5_3'], conv5_3, box_info_list[3])
-
-        conv6_3 = self.model6(conv5_3)
-        conv6_3 = self.weight_layer6(instance_feature['conv6_3'], conv6_3, box_info_list[3])
-
-        conv7_3 = self.model7(conv6_3)
-        conv7_3 = self.weight_layer7(instance_feature['conv7_3'], conv7_3, box_info_list[3])
-
-        conv8_up = self.model8up(conv7_3) + self.model3short8(conv3_3)
+        conv8_up = self.model8up(conv4_3) + self.model3short8(conv3_3)
         conv8_up = self.weight_layer8_1(instance_feature['conv8_up'], conv8_up, box_info_list[2])
 
         conv8_3 = self.model8(conv8_up)
