@@ -78,6 +78,8 @@ def define_G(input_nc, output_nc, ngf, which_model_netG, norm='batch', use_dropo
         netG = FusionGenerator(input_nc, output_nc, norm_layer=norm_layer, use_tanh=use_tanh, classification=classification, weight=weight)
     elif which_model_netG == 'fusion' and fusion_type == "larger":
         netG = FusionGeneratorLarger(input_nc, output_nc, norm_layer=norm_layer, use_tanh=use_tanh, classification=classification, weight=weight)
+    elif which_model_netG == 'fusion' and fusion_type == "smaller":
+        netG = FusionGeneratorSmaller(input_nc, output_nc, norm_layer=norm_layer, use_tanh=use_tanh, classification=classification, weight=weight)
     else:
         raise NotImplementedError('Generator model name [%s] is not recognized' % which_model_netG)
     return init_net(netG, init_type, gpu_ids)
@@ -571,7 +573,6 @@ class FusionGeneratorSmaller(nn.Module):
         model1 += [nn.ReLU(True), ]
         model1 += [nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model1 += [nn.ReLU(True), ]
-        model1 += [norm_layer(64), ]
         # add a subsampling operation
 
         self.weight_layer = WeightGeneratorSetting(64)
@@ -581,7 +582,6 @@ class FusionGeneratorSmaller(nn.Module):
         model2 += [nn.ReLU(True), ]
         model2 += [nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model2 += [nn.ReLU(True), ]
-        model2 += [norm_layer(128), ]
         # add a subsampling layer operation
 
         self.weight_layer2 = WeightGeneratorSetting(128)
@@ -591,7 +591,6 @@ class FusionGeneratorSmaller(nn.Module):
         model3 += [nn.ReLU(True), ]
         model3 += [nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model3 += [nn.ReLU(True), ]
-        model3 += [norm_layer(256), ]
         # add a subsampling layer operation
 
         self.weight_layer3 = WeightGeneratorSetting(256)
@@ -601,7 +600,6 @@ class FusionGeneratorSmaller(nn.Module):
         model4 += [nn.ReLU(True), ]
         model4 += [nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model4 += [nn.ReLU(True), ]
-        model4 += [norm_layer(512), ]
 
         self.weight_layer4 = WeightGeneratorSetting(512)
 
@@ -615,7 +613,6 @@ class FusionGeneratorSmaller(nn.Module):
         model8 = [nn.ReLU(True), ]
         model8 += [nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model8 += [nn.ReLU(True), ]
-        model8 += [norm_layer(256), ]
 
         self.weight_layer8_2 = WeightGeneratorSetting(256)
 
@@ -629,7 +626,6 @@ class FusionGeneratorSmaller(nn.Module):
         model9 = [nn.ReLU(True), ]
         model9 += [nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1, bias=use_bias), ]
         model9 += [nn.ReLU(True), ]
-        model9 += [norm_layer(128), ]
 
         self.weight_layer9_2 = WeightGeneratorSetting(128)
 
