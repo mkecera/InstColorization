@@ -111,6 +111,21 @@ class L2Loss(nn.Module):
     def __call__(self, in0, in1):
         return torch.sum((in0 - in1)**2, dim=1, keepdim=True)
 
+class NeighbourLoss(nn.Module):
+    def __init__(self):
+        super(NeighbourLoss, self).__init__()
+
+    def __call__(self, L, ab):
+        l_diff = L[:, :, :-1, :] - L[:, :, 1:, :]
+        l_diff = torch.exp(-l_diff ** 2)
+        ab_diff = ab[:, :, :-1, :] - ab[:, :, 1:, :]
+        loss = torch.mean(l_diff*ab_diff.abs())
+
+        l_diff = L[:, :, :, :-1] - L[:, :, :, 1:]
+        l_diff = torch.exp(-l_diff ** 2)
+        ab_diff = ab[:, :, :, :-1] - ab[:, :, :, 1:]
+        loss += torch.mean(l_diff*ab_diff.abs())
+        return loss
 
 class SIGGRAPHGenerator(nn.Module):
     def __init__(self, input_nc, output_nc, norm_layer=nn.BatchNorm2d, use_tanh=True, classification=True):

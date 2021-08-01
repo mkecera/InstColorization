@@ -25,7 +25,7 @@ class TrainModel(BaseModel):
 
     def initialize(self, opt):
         BaseModel.initialize(self, opt)
-        self.loss_names = ['G', 'L1', 'CE']
+        self.loss_names = ['G', 'L1', 'CE', 'neighbor']
         # load/define networks
         num_in = opt.input_nc + opt.output_nc + 1
         self.optimizers = []
@@ -77,6 +77,7 @@ class TrainModel(BaseModel):
         self.criterionL1 = networks.L1Loss()
         # self.criterionL1 = networks.L2Loss()
         self.criterionCE = torch.nn.CrossEntropyLoss()
+        self.criterionNeighbor = networks.NeighbourLoss()
 
         # initialize average loss values
         self.avg_losses = OrderedDict()
@@ -128,12 +129,14 @@ class TrainModel(BaseModel):
             self.loss_G = 10 * torch.mean(self.criterionL1(self.fake_B_reg.type(torch.cuda.FloatTensor),
                                                         self.real_B.type(torch.cuda.FloatTensor)))
         elif self.opt.stage == 'fusion':
+            self.loss_neighbor = self.criterionNeighbor(self.full_real_A.type(torch.cuda.FloatTensor),
+                                                        self.fake_B_reg.type(torch.cuda.FloatTensor))
             self.loss_CE = self.criterionCE(self.fake_B_class.type(torch.cuda.FloatTensor),
                                             self.full_real_B_enc[:, 0, :, :].type(torch.cuda.LongTensor))
             self.loss_L1 = torch.mean(self.criterionL1(self.fake_B_reg.type(torch.cuda.FloatTensor),
                                                         self.full_real_B.type(torch.cuda.FloatTensor)))
-            # self.loss_G = self.loss_CE + 10*self.loss_L1
-            self.loss_G = 10 * self.loss_L1
+            self.loss_G = self.loss_CE + 10*self.loss_L1 + 10*self.loss_neighbor
+
         else:
             print('Error! Wrong stage selection!')
             exit()

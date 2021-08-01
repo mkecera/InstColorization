@@ -32,7 +32,7 @@ class BaseModel():
         self.visual_names = []
         self.image_paths = []
 
-        self.loss_names = ['G', 'L1']
+        self.loss_names = ['G', 'L1', 'CE']
         self.avg_losses = OrderedDict()
         self.avg_loss_alpha = opt.avg_loss_alpha
         self.error_cnt = 0

@@ -91,6 +91,8 @@ if __name__ == '__main__':
                        'train_G_loss': [],
                        'val_CE_loss': [],
                        'val_G_loss': [],
+                       'train_neighbor_loss': [],
+                       'val_neighbor_loss': []
                        }
         for epoch in trange(opt.epoch_count, opt.niter + opt.niter_decay, desc='epoch', dynamic_ncols=True):
             epoch_iter = 0
@@ -129,11 +131,13 @@ if __name__ == '__main__':
                 train_psnr.append(model.get_current_metric()[0])
                 train_ssim.append(model.get_current_metric()[1])
 
+            # print(model.get_current_losses())
             loss_metric['train_L1_loss'].append(model.get_current_losses()['L1'])
             loss_metric['train_CE_loss'].append(model.get_current_losses()['CE'])
             loss_metric['train_G_loss'].append(model.get_current_losses()['G'])
             loss_metric['train_psnr'].append(np.mean(train_psnr))
             loss_metric['train_ssim'].append(np.mean(train_ssim))
+            loss_metric['train_neighbor_loss'].append(model.get_current_losses()['neighbor'])
 
             if epoch % opt.save_epoch_freq == 0:
                 model.save_fusion_epoch(epoch)
@@ -172,6 +176,7 @@ if __name__ == '__main__':
             loss_metric['val_G_loss'].append(model.get_current_losses()['G'])
             loss_metric['val_psnr'].append(np.mean(val_psnr))
             loss_metric['val_ssim'].append(np.mean(val_ssim))
+            loss_metric['val_neighbor_loss'].append(model.get_current_losses()['neighbor'])
 
             loss_metric_df = pd.DataFrame(loss_metric)
             now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
