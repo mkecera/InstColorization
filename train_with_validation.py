@@ -87,6 +87,10 @@ if __name__ == '__main__':
                        'val_L1_loss': [],
                        'val_psnr': [],
                        'val_ssim': [],
+                       'train_CE_loss': [],
+                       'train_G_loss': [],
+                       'val_CE_loss': [],
+                       'val_G_loss': [],
                        }
         for epoch in trange(opt.epoch_count, opt.niter + opt.niter_decay, desc='epoch', dynamic_ncols=True):
             epoch_iter = 0
@@ -126,6 +130,8 @@ if __name__ == '__main__':
                 train_ssim.append(model.get_current_metric()[1])
 
             loss_metric['train_L1_loss'].append(model.get_current_losses()['L1'])
+            loss_metric['train_CE_loss'].append(model.get_current_losses()['CE'])
+            loss_metric['train_G_loss'].append(model.get_current_losses()['G'])
             loss_metric['train_psnr'].append(np.mean(train_psnr))
             loss_metric['train_ssim'].append(np.mean(train_ssim))
 
@@ -162,12 +168,14 @@ if __name__ == '__main__':
                 val_ssim.append(model.get_current_metric()[1])
 
             loss_metric['val_L1_loss'].append(model.get_current_losses()['L1'])
+            loss_metric['val_CE_loss'].append(model.get_current_losses()['CE'])
+            loss_metric['val_G_loss'].append(model.get_current_losses()['G'])
             loss_metric['val_psnr'].append(np.mean(val_psnr))
             loss_metric['val_ssim'].append(np.mean(val_ssim))
 
-        loss_metric_df = pd.DataFrame(loss_metric)
-        now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        loss_metric_df.to_csv(f'loss_log/{now}_loss.txt')
+            loss_metric_df = pd.DataFrame(loss_metric)
+            now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            loss_metric_df.to_csv(f'loss_log/{opt.name}_{now}_loss.txt')
 
     else:
         print('Error! Wrong stage selection!')

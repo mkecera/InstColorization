@@ -4,7 +4,7 @@ from collections import OrderedDict
 from . import networks
 import skimage
 from util import util
-from skimage import io, img_as_ubyte
+from skimage import io, img_as_ubyte, metrics
 import numpy as np
 
 

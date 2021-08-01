@@ -110,27 +110,6 @@ class L2Loss(nn.Module):
 
     def __call__(self, in0, in1):
         return torch.sum((in0 - in1)**2, dim=1, keepdim=True)
-    
-class GANLoss(nn.Module):
-    def __init__(self, use_lsgan=True, target_real_label=1.0, target_fake_label=0.0):
-        super(GANLoss, self).__init__()
-        self.register_buffer('real_label', torch.tensor(target_real_label))
-        self.register_buffer('fake_label', torch.tensor(target_fake_label))
-        if use_lsgan:
-            self.loss = nn.MSELoss()
-        else:
-            self.loss = nn.BCELoss()
-
-    def get_target_tensor(self, input, target_is_real):
-        if target_is_real:
-            target_tensor = self.real_label
-        else:
-            target_tensor = self.fake_label
-        return target_tensor.expand_as(input)
-
-    def __call__(self, input, target_is_real):
-        target_tensor = self.get_target_tensor(input, target_is_real)
-        return self.loss(input, target_tensor)
 
 
 class SIGGRAPHGenerator(nn.Module):
@@ -571,7 +550,10 @@ class FusionGenerator(nn.Module):
         conv8_3 = self.model8(conv8_up)
         conv8_3 = self.weight_layer8_2(instance_feature['conv8_3'], conv8_3, box_info_list[2])
 
-        conv9_up = self.model9up(conv8_3) + self.model2short9(conv2_2)
+        out_class = self.model_class(conv8_3)
+
+        conv9_up = self.model9up(conv8_3.detach()) + self.model2short9(conv2_2.detach())
+        # conv9_up = self.model9up(conv8_3) + self.model2short9(conv2_2)
         conv9_up = self.weight_layer9_1(instance_feature['conv9_up'], conv9_up, box_info_list[1])
 
         conv9_3 = self.model9(conv9_up)
@@ -584,7 +566,7 @@ class FusionGenerator(nn.Module):
         conv10_2 = self.weight_layer10_2(instance_feature['conv10_2'], conv10_2, box_info_list[0])
         
         out_reg = self.model_out(conv10_2)
-        return out_reg
+        return out_reg, out_class
 
 
 class WeightGenerator(nn.Module):

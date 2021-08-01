@@ -25,7 +25,7 @@ class TrainModel(BaseModel):
 
     def initialize(self, opt):
         BaseModel.initialize(self, opt)
-        self.loss_names = ['G', 'L1']
+        self.loss_names = ['G', 'L1', 'CE']
         # load/define networks
         num_in = opt.input_nc + opt.output_nc + 1
         self.optimizers = []
@@ -73,8 +73,10 @@ class TrainModel(BaseModel):
         else:
             print('Error Stage!')
             exit()
-        self.criterionL1 = networks.HuberLoss(delta=1. / opt.ab_norm)
-        # self.criterionL1 = networks.L1Loss()
+        # self.criterionL1 = networks.HuberLoss(delta=1. / opt.ab_norm)
+        self.criterionL1 = networks.L1Loss()
+        # self.criterionL1 = networks.L2Loss()
+        self.criterionCE = torch.nn.CrossEntropyLoss()
 
         # initialize average loss values
         self.avg_losses = OrderedDict()
@@ -112,7 +114,7 @@ class TrainModel(BaseModel):
         elif self.opt.stage == 'fusion':
             (_, self.comp_B_reg) = self.netGComp(self.full_real_A, self.full_hint_B, self.full_mask_B)
             (_, feature_map) = self.netG(self.real_A, self.hint_B, self.mask_B)
-            self.fake_B_reg = self.netGF(self.full_real_A, self.full_hint_B, self.full_mask_B, feature_map, self.box_info_list)
+            (self.fake_B_reg, self.fake_B_class) = self.netGF(self.full_real_A, self.full_hint_B, self.full_mask_B, feature_map, self.box_info_list)
         else:
             print('Error! Wrong stage selection!')
             exit()
@@ -126,10 +128,12 @@ class TrainModel(BaseModel):
             self.loss_G = 10 * torch.mean(self.criterionL1(self.fake_B_reg.type(torch.cuda.FloatTensor),
                                                         self.real_B.type(torch.cuda.FloatTensor)))
         elif self.opt.stage == 'fusion':
+            self.loss_CE = self.criterionCE(self.fake_B_class.type(torch.cuda.FloatTensor),
+                                            self.full_real_B_enc[:, 0, :, :].type(torch.cuda.LongTensor))
             self.loss_L1 = torch.mean(self.criterionL1(self.fake_B_reg.type(torch.cuda.FloatTensor),
                                                         self.full_real_B.type(torch.cuda.FloatTensor)))
-            self.loss_G = 10 * torch.mean(self.criterionL1(self.fake_B_reg.type(torch.cuda.FloatTensor),
-                                                        self.full_real_B.type(torch.cuda.FloatTensor)))
+            # self.loss_G = self.loss_CE + 10*self.loss_L1
+            self.loss_G = 10 * self.loss_L1
         else:
             print('Error! Wrong stage selection!')
             exit()
