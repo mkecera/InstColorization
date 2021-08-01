@@ -37,12 +37,14 @@ for sequence_path in dirs:
     root_dir = sequence_path + '/'
 
     image_list = [f for f in listdir(input_dir) if isfile(join(input_dir, f))]
-    output_path = "{0}_bbox".format(root_dir)
+    output_path = "{0}input_bbox".format(root_dir)
 
     # output_path = './data/output_npz/'
     if os.path.isdir(output_path) is False:
         print('Create path: {0}'.format(output_path))
         os.makedirs(output_path)
+    else:
+        continue
 
     for image_path in tqdm(image_list):
         img = cv2.imread(join(input_dir, image_path))

@@ -8,7 +8,6 @@ target_directory = str('/home/ubuntu/InstColorization/test_tiny')
 data_set_percent_size = float(0.20)
 
 #print(os.listdir(directory))
-
 # list all files in dir that are an image
 files = [f for f in os.listdir(directory)]
 

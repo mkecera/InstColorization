@@ -65,7 +65,5 @@ def prepare_training_data(training_path):
 
 
 if __name__ == '__main__':
-    # video_path = './data/testing/input.mp4'
-    # prepare_testing_data(video_path)
     video_path = './data/training/'
     prepare_training_data(video_path)
