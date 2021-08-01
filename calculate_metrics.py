@@ -36,9 +36,9 @@ if __name__ == '__main__':
     dataset_size = len(dataset)
     print('#Testing images = %d' % dataset_size)
 
-    model = create_model(opt)
+    # model = create_model(opt)
     # model.setup_to_test('coco_finetuned_mask_256')
-    model.setup_to_test('coco_tiny_fusion')
+    # model.setup_to_test('coco_tiny_fusion')
 
     count_empty = 0
     all_psnr = np.array([])
@@ -66,3 +66,5 @@ if __name__ == '__main__':
 
     print('{0} PSNR'.format(np.average(all_psnr)))
     print('{0} SSIM'.format(np.average(all_ssim)))
+    print(all_psnr)
+    print(all_ssim)

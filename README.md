@@ -88,4 +88,5 @@ If you find our code/models useful, please consider citing our paper:
 ```
 
 ## Acknowledgments
+<<<<<<< HEAD
 Our code borrows heavily from the amazing [colorization-pytorch](https://github.com/richzhang/colorization-pytorch) repository.

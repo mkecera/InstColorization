@@ -11,6 +11,8 @@ class BaseOptions():
         self.initialized = False
 
     def initialize(self, parser):
+        parser.add_argument('--weight', type=str, default=None, help='weight matrix experiment - more or None')
+        parser.add_argument('--fusion_type', type=str, default=None, help='fusion type experiment - larger or smaller or None')
         parser.add_argument('--batch_size', type=int, default=25, help='input batch size')
         parser.add_argument('--loadSize', type=int, default=256, help='scale images to this size')
         parser.add_argument('--fineSize', type=int, default=256, help='then crop to this size')
