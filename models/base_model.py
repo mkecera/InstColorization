@@ -4,7 +4,7 @@ from collections import OrderedDict
 from . import networks
 import skimage
 from util import util
-from skimage import io, img_as_ubyte
+from skimage import io, img_as_ubyte, metrics
 import numpy as np
 
 
@@ -32,7 +32,7 @@ class BaseModel():
         self.visual_names = []
         self.image_paths = []
 
-        self.loss_names = ['G', 'L1']
+        self.loss_names = ['G', 'L1', 'CE']
         self.avg_losses = OrderedDict()
         self.avg_loss_alpha = opt.avg_loss_alpha
         self.error_cnt = 0
