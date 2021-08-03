@@ -22,6 +22,7 @@ torch.backends.cudnn.benchmark = True
 
 import cv2
 import skimage
+import pandas as pd
 
 if __name__ == '__main__':
     opt = TestOptions().parse()
@@ -43,6 +44,7 @@ if __name__ == '__main__':
     count_empty = 0
     all_psnr = np.array([])
     all_ssim = np.array([])
+    all_ids = np.array([])
     for data_raw in tqdm(dataset_loader, dynamic_ncols=True):
         
         # calculate metrics
@@ -61,10 +63,9 @@ if __name__ == '__main__':
         ssim = skimage.metrics.structural_similarity(true_img, test_img, multichannel=True)
 
         # save to array
+        all_ids = np.append(all_ids, data_raw['file_id'][0])
         all_psnr = np.append(all_psnr, psnr)
         all_ssim = np.append(all_ssim, ssim)
 
-    print('{0} PSNR'.format(np.average(all_psnr)))
-    print('{0} SSIM'.format(np.average(all_ssim)))
-    print(all_psnr)
-    print(all_ssim)
+    result = pd.DataFrame([all_ids, all_psnr, all_ssim])
+    result.to_csv(f'metrics_test_small/{opt.results_img_dir}.csv')

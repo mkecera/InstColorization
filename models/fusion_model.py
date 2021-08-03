@@ -84,15 +84,15 @@ class FusionModel(BaseModel):
 
     def forward(self):
         (_, feature_map) = self.netG(self.real_A, self.hint_B, self.mask_B)
-        self.fake_B_reg = self.netGF(self.full_real_A, self.full_hint_B, self.full_mask_B, feature_map, self.box_info_list)
+        (self.fake_B_reg, self.fake_B_class) = self.netGF(self.full_real_A, self.full_hint_B, self.full_mask_B, feature_map, self.box_info_list)
         
     def save_current_imgs(self, path):
         out_img = torch.clamp(util.lab2rgb(torch.cat((self.full_real_A.type(torch.cuda.FloatTensor), self.fake_B_reg.type(torch.cuda.FloatTensor)), dim=1), self.opt), 0.0, 1.0)
         out_img = np.transpose(out_img.cpu().data.numpy()[0], (1, 2, 0))
         io.imsave(path, img_as_ubyte(out_img))
 
-    def setup_to_test(self, fusion_weight_path):
-        GF_path = 'checkpoints/{0}/latest_net_GF.pth'.format(fusion_weight_path)
+    def setup_to_test(self, fusion_weight_path, fusion_weight_epoch):
+        GF_path = 'checkpoints/{0}/{1}_net_GF.pth'.format(fusion_weight_path, fusion_weight_epoch)
         # GF_path = 'checkpoints/{0}'.format(fusion_weight_path)
         print('load Fusion model from %s' % GF_path)
         GF_state_dict = torch.load(GF_path)
